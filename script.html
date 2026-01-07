@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DO NOT WAIT</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  color: white;
+  font-family: monospace;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screen {
+  display: none;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 40px;
+}
+
+.active { display: block; }
+
+#timer {
+  font-size: 6vw;
+  letter-spacing: 0.15em;
+  margin-bottom: 40px;
+}
+
+.glitch {
+  animation: glitch 1.5s infinite;
+}
+
+@keyframes glitch {
+  0% { text-shadow: 2px 0 red; }
+  25% { text-shadow: -2px 0 cyan; }
+  50% { text-shadow: 2px 2px magenta; }
+  75% { text-shadow: -2px -2px lime; }
+  100% { text-shadow: 2px 0 red; }
+}
+
+input {
+  background: black;
+  border: 1px solid white;
+  color: white;
+  padding: 10px;
+  font-family: monospace;
+  margin-top: 25px;
+  text-align: center;
+}
+
+.subtle {
+  opacity: 0.6;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+pre {
+  text-align: left;
+  max-width: 600px;
+  margin: auto;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ACT I — DIVINITY -->
+<div id="act1" class="screen active">
+  <div id="timer" class="glitch">24:00:00</div>
+
+  <h2>What he said?</h2>
+
+  <audio controls>
+    <!-- você troca o áudio depois -->
+    <source src="audio.wav" type="audio/wav">
+  </audio>
+
+  <div class="subtle">The sound is useless.</div>
+
+  <input id="answer1" placeholder="ANSWER">
+</div>
+
+<!-- ACT II — SOMETHING WRONG? -->
+<div id="act2" class="screen">
+  <h2>Everything is consistent.</h2>
+
+  <p id="statement">Nothing here is changing.</p>
+
+  <div class="subtle">
+    Observe carefully.
+  </div>
+
+  <div style="height:500px;"></div>
+
+  <p id="footerText" class="subtle">
+    This page has remained the same since you arrived.
+  </p>
+
+  <input id="answer2" placeholder="WHAT IS WRONG?">
+</div>
+
+<!-- ACT III — CONTAMINATION -->
+<div id="act3" class="screen">
+  <pre id="terminal">
+> connection established
+> permission granted
+> do not interrupt
+  </pre>
+</div>
+
+<!-- ACT IV — PARANOIA -->
+<div id="act4" class="screen">
+  <h2>Say it.</h2>
+  <input id="finalAnswer" placeholder="...">
+</div>
+
+<script>
+/* ======================
+   TIMER (24h local)
+====================== */
+const timerEl = document.getElementById("timer");
+const endTime = new Date();
+endTime.setHours(endTime.getHours() + 24);
+
+function updateTimer() {
+  const now = new Date();
+  const diff = endTime - now;
+
+  if (diff <= 0) {
+    timerEl.textContent = "00:00:00";
+    return;
+  }
+
+  const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+  const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+
+  timerEl.textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateTimer, 1000);
+updateTimer();
+
+/* ======================
+   ACT I — ANSWER
+====================== */
+document.getElementById("answer1").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    if (e.target.value.toLowerCase().trim() === "he was going to let me in") {
+      transition("act1", "act2");
+    } else {
+      e.target.value = "";
+      e.target.placeholder = "WRONG";
+    }
+  }
+});
+
+/* ======================
+   ACT II — CONTRADICTION
+====================== */
+const footerText = document.getElementById("footerText");
+let flip = false;
+
+setInterval(() => {
+  flip = !flip;
+  footerText.textContent = flip
+    ? "This page has remained the same since you arrived."
+    : "This page has never been stable.";
+}, 3000);
+
+document.getElementById("answer2").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    const v = e.target.value.toLowerCase().trim();
+    if (
+      v === "the page is changing" ||
+      v === "it is changing" ||
+      v === "it changes"
+    ) {
+      transition("act2", "act3");
+    } else {
+      e.target.value = "";
+      e.target.placeholder = "INCORRECT";
+    }
+  }
+});
+
+/* ======================
+   ACT III — DO NOTHING
+====================== */
+setTimeout(() => {
+  if (document.getElementById("act3").classList.contains("active")) {
+    transition("act3", "act4");
+  }
+}, 60000);
+
+/* ======================
+   ACT IV — CONFESSION
+====================== */
+document.getElementById("finalAnswer").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    if (e.target.value.toLowerCase().trim() === "i let you in") {
+      document.body.innerHTML = `
+        <h1 class="glitch">
+          Divinity requires permission.
+        </h1>
+      `;
+    } else {
+      e.target.value = "";
+    }
+  }
+});
+
+/* ======================
+   TRANSITION
+====================== */
+function transition(from, to) {
+  document.getElementById(from).classList.remove("active");
+  document.getElementById(to).classList.add("active");
+}
+</script>
+
+</body>
+</html>
